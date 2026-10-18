@@ -13,13 +13,12 @@ class EduPlanApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        // Seed-цвет: насыщенный индиго — «учебный», спокойный, хорошо читается.
-        // Вся палитра приложения выводится из этого одного цвета.
+        
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3949AB)),
         textTheme: const TextTheme(
           titleLarge: TextStyle(fontWeight: FontWeight.w600),
         ),
-      ),
+      ), 
       home: const LoginScreen(),
     );
   }
