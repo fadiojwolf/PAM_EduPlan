@@ -1,8 +1,7 @@
 import '../models/assignment.dart';
 import '../models/course.dart';
 
-/// Реальное расписание группы: одна запись = одна пара в конкретный день/время.
-/// Чётность недели (săpt. impară / pară) указана в названии.
+
 const mockCourses = [
   // ---- Понедельник ----
   Course(
