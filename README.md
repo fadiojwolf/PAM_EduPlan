@@ -1,6 +1,6 @@
 # eduplan
 
-A new Flutter project.
+CR-232 Zgurski Dmitri  T3 EduPlan 
 
 ## Getting Started
 
