@@ -1,35 +1,24 @@
 import 'package:flutter/material.dart';
-import 'assignments_screen.dart';
-import 'courses_screen.dart';
-import 'profile_screen.dart';
-import 'schedule_screen.dart';
+import 'package:go_router/go_router.dart';
 
-/// Каркас с нижней навигацией (временные «строительные леса» до L3).
-/// Единственный StatefulWidget в проекте: хранит только индекс вкладки.
-class HomeShell extends StatefulWidget {
-  const HomeShell({super.key});
+/// Обёртка с постоянными вкладками. StatelessWidget: текущий индекс знает
+/// router (navigationShell), поэтому собственное состояние не нужно.
+class AppShell extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
 
-  @override
-  State<HomeShell> createState() => _HomeShellState();
-}
-
-class _HomeShellState extends State<HomeShell> {
-  int _index = 0;
-
-  static const _pages = <Widget>[
-    ScheduleScreen(),
-    CoursesScreen(),
-    AssignmentsScreen(),
-    ProfileScreen(),
-  ];
+  const AppShell({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_index],
+      body: navigationShell, // содержимое текущей вкладки
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        selectedIndex: navigationShell.currentIndex,
+        // Повторное нажатие на активную вкладку возвращает её к корню.
+        onDestinationSelected: (index) => navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        ),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.calendar_view_week_outlined),
