@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../data/mock_data.dart';
 import '../models/course.dart';
 import '../widgets/course_card.dart';
-import 'course_detail_screen.dart';
 
 /// Недельное расписание: пары, сгруппированные по дням недели.
 class ScheduleScreen extends StatelessWidget {
@@ -47,12 +48,8 @@ class ScheduleScreen extends StatelessWidget {
           final course = item as Course;
           return CourseCard(
             course: course,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => CourseDetailScreen(course: course),
-              ),
-            ),
+            // push: «зайду и вернусь». Путешествует только id.
+            onTap: () => context.push('/schedule/course/${course.id}'),
           );
         },
       ),

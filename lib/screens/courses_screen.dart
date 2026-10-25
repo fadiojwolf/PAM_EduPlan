@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../data/mock_data.dart';
 import '../widgets/course_card.dart';
 import '../widgets/filter_chips_row.dart';
-import 'course_detail_screen.dart';
 
-/// Список курсов: поиск + фильтр по дню недели (визуально).
+/// Список курсов: поиск + фильтр по дню недели (визуально, логика — L4).
 class CoursesScreen extends StatelessWidget {
   const CoursesScreen({super.key});
 
@@ -39,12 +40,7 @@ class CoursesScreen extends StatelessWidget {
                 return CourseCard(
                   course: course,
                   showWeekday: true,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CourseDetailScreen(course: course),
-                    ),
-                  ),
+                  onTap: () => context.push('/courses/${course.id}'),
                 );
               },
             ),

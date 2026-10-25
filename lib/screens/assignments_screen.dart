@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../data/mock_data.dart';
 import '../widgets/assignment_card.dart';
 import '../widgets/filter_chips_row.dart';
-import 'assignment_form_screen.dart';
 
-/// Список заданий: фильтр по статусу и по сроку (визуально).
+/// Список заданий: фильтр по статусу и по сроку (визуально, логика — L4).
 class AssignmentsScreen extends StatelessWidget {
   const AssignmentsScreen({super.key});
 
@@ -16,10 +17,7 @@ class AssignmentsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Задания')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AssignmentFormScreen()),
-        ),
+        onPressed: () => context.push('/assignments/new'),
         icon: const Icon(Icons.add),
         label: const Text('Новое задание'),
       ),
@@ -42,6 +40,7 @@ class AssignmentsScreen extends StatelessWidget {
                 return AssignmentCard(
                   assignment: a,
                   courseName: courseById(a.courseId).name,
+                  onTap: () => context.push('/assignments/${a.id}'),
                 );
               },
             ),

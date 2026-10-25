@@ -183,7 +183,7 @@ final mockAssignments = <Assignment>[
   Assignment(
     id: 6,
     courseId: 9, // TTGE
-    title: '',
+    title: 'Создание, предоставление и отзыв электронной доверенности с использованием платформы MPower.',
     deadline: DateTime(2026, 11, 5),
     status: AssignmentStatus.todo,
     priority: Priority.medium,
@@ -207,3 +207,6 @@ final mockAssignments = <Assignment>[
 ];
 
 Course courseById(int id) => mockCourses.firstWhere((c) => c.id == id);
+
+Assignment assignmentById(int id) =>
+    mockAssignments.firstWhere((a) => a.id == id);
