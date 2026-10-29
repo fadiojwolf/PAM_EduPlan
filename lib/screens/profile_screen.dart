@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import '../data/mock_data.dart';
 import '../models/assignment.dart';
+import '../widgets/confirm_dialog.dart';
 import '../widgets/info_row.dart';
-import 'login_screen.dart';
 
-/// Профиль пользователя (статические данные).
+/// Профиль пользователя + выход с подтверждением.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    final ok = await showConfirmDialog(
+      context,
+      title: 'Выйти из аккаунта?',
+      confirmLabel: 'Да, выйти',
+    );
+    // После await context используется только под context.mounted.
+    if (ok && context.mounted) {
+      context.go('/login'); // go: раздел с вкладками уходит из стека
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,11 +103,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: () => Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-              (route) => false,
-            ),
+            onPressed: () => _logout(context),
             icon: const Icon(Icons.logout),
             label: const Text('Выйти'),
           ),
