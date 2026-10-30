@@ -175,7 +175,7 @@ final mockAssignments = <Assignment>[
   Assignment(
     id: 5,
     courseId: 8, // TH
-    title: '',
+    title: 'Лабораторная работа №2',
     deadline: DateTime(2026, 10, 19),
     status: AssignmentStatus.done,
     priority: Priority.medium,
@@ -205,8 +205,3 @@ final mockAssignments = <Assignment>[
     priority: Priority.low,
   ),
 ];
-
-Course courseById(int id) => mockCourses.firstWhere((c) => c.id == id);
-
-Assignment assignmentById(int id) =>
-    mockAssignments.firstWhere((a) => a.id == id);

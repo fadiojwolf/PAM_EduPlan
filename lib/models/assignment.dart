@@ -36,6 +36,24 @@ class Assignment {
     required this.status,
     required this.priority,
   });
+
+  /// «То же задание, но с другими полями» (id выдаёт хранилище).
+  Assignment copyWith({
+    int? id,
+    int? courseId,
+    String? title,
+    DateTime? deadline,
+    AssignmentStatus? status,
+    Priority? priority,
+  }) =>
+      Assignment(
+        id: id ?? this.id,
+        courseId: courseId ?? this.courseId,
+        title: title ?? this.title,
+        deadline: deadline ?? this.deadline,
+        status: status ?? this.status,
+        priority: priority ?? this.priority,
+      );
 }
 
 String formatDeadline(DateTime d) =>

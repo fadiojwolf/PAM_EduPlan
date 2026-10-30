@@ -29,6 +29,16 @@ class Course {
     required this.startTime,
   });
 
+  /// «Тот же курс, другая идентичность» (id выдаёт хранилище).
+  Course copyWith({int? id}) => Course(
+        id: id ?? this.id,
+        name: name,
+        teacher: teacher,
+        room: room,
+        weekday: weekday,
+        startTime: startTime,
+      );
+
   /// Конец пары вычисляется (пара = 90 минут), в модели не хранится.
   String get endTime {
     final parts = startTime.split(':');
