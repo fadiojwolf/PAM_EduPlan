@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
+import '../models/assignment_model.dart';
 import '../models/course.dart';
+import '../models/course_model.dart';
+import '../widgets/assignment_actions.dart';
 import '../widgets/assignment_card.dart';
+import '../widgets/error_view.dart';
 import '../widgets/info_row.dart';
 
-/// Карточка курса: экран получает только id и сам ищет курс.
-/// (Сегодня — в mock-е, на L4 — через Repository, на L5 — из backend-а.)
+/// Карточка курса: экран получает только id и ищет курс через модель.
 class CourseDetailScreen extends StatelessWidget {
   final int id;
 
@@ -16,14 +19,64 @@ class CourseDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final course = courseById(id);
-    final related =
-        mockAssignments.where((a) => a.courseId == course.id).toList();
+    final courses = context.watch<CourseModel>();
+    final assignments = context.watch<AssignmentModel>();
+    final course = courses.byId(id);
+
+    // null имеет два смысла: «ещё грузится» / «ошибка» / «не существует».
+    if (course == null) {
+      final Widget body;
+      if (courses.isLoading) {
+        body = const Center(child: CircularProgressIndicator());
+      } else if (courses.error != null) {
+        body = ErrorView(
+          message: courses.error!,
+          onRetry: () => context.read<CourseModel>().load(),
+        );
+      } else {
+        body = const Center(child: Text('Курс не существует'));
+      }
+      return Scaffold(
+        appBar: AppBar(title: const Text('Карточка курса')),
+        body: body,
+      );
+    }
+
+    // Секция заданий — свои три состояния.
+    final Widget assignmentsSection;
+    if (assignments.isLoading) {
+      assignmentsSection = const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    } else if (assignments.error != null) {
+      assignmentsSection = ErrorView(
+        message: assignments.error!,
+        onRetry: () => context.read<AssignmentModel>().load(),
+      );
+    } else {
+      final related = assignments.forCourse(course.id);
+      assignmentsSection = related.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Text('Для этого курса заданий пока нет.'),
+            )
+          : Column(
+              children: [
+                for (final a in related)
+                  AssignmentCard(
+                    key: ValueKey(a.id),
+                    assignment: a,
+                    onTap: () => context.push('/assignments/${a.id}'),
+                    onToggleDone: () => toggleAssignmentDone(context, a),
+                  ),
+              ],
+            );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Карточка курса')),
       floatingActionButton: FloatingActionButton.extended(
-        // Курс предвыбирается через query-параметр адреса, а не через extra.
         onPressed: () => context.push('/assignments/new?courseId=${course.id}'),
         icon: const Icon(Icons.add),
         label: const Text('Задание'),
@@ -65,18 +118,7 @@ class CourseDetailScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Text('Задания по курсу', style: textTheme.titleLarge),
           const SizedBox(height: 8),
-          if (related.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Text('Для этого курса заданий пока нет.'),
-            )
-          else
-            ...related.map(
-              (a) => AssignmentCard(
-                assignment: a,
-                onTap: () => context.push('/assignments/${a.id}'),
-              ),
-            ),
+          assignmentsSection,
           const SizedBox(height: 72), // место под FAB
         ],
       ),
