@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// Горизонтальный ряд фильтров-чипов (визуальный элемент; логика — на L4).
-/// Используется на экранах «Курсы» и «Задания».
+/// Горизонтальный ряд фильтров-чипов. Выбранный индекс хранит экран
+/// (эфемерное состояние → setState), виджет только рисует и сообщает о нажатии.
 class FilterChipsRow extends StatelessWidget {
   final List<String> labels;
   final int selectedIndex;
+  final ValueChanged<int>? onSelected;
 
   const FilterChipsRow({
     super.key,
     required this.labels,
     this.selectedIndex = 0,
+    this.onSelected,
   });
 
   @override
@@ -24,7 +26,7 @@ class FilterChipsRow extends StatelessWidget {
         itemBuilder: (context, i) => ChoiceChip(
           label: Text(labels[i]),
           selected: i == selectedIndex,
-          onSelected: (_) {}, // на L2 без эффекта
+          onSelected: (_) => onSelected?.call(i),
         ),
       ),
     );
