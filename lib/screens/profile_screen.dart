@@ -1,24 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
-import '../models/assignment.dart';
+import '../data/mock_network.dart';
+import '../models/assignment_model.dart';
 import '../widgets/confirm_dialog.dart';
 import '../widgets/info_row.dart';
 
-/// Профиль пользователя + выход с подтверждением.
-class ProfileScreen extends StatelessWidget {
+/// Профиль: статистика заданий (из модели), выход с подтверждением и
+/// переключатель аварии для демонстрации экрана ошибки.
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
-  Future<void> _logout(BuildContext context) async {
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  // Эфемерное состояние → setState (положение переключателя).
+  late bool _simulateError;
+
+  @override
+  void initState() {
+    super.initState();
+    _simulateError = context.read<MockNetwork>().simulateError;
+  }
+
+  Future<void> _logout() async {
     final ok = await showConfirmDialog(
       context,
       title: 'Выйти из аккаунта?',
       confirmLabel: 'Да, выйти',
     );
-    // После await context используется только под context.mounted.
-    if (ok && context.mounted) {
-      context.go('/login'); // go: раздел с вкладками уходит из стека
+    if (ok && mounted) {
+      context.go('/login');
     }
   }
 
@@ -26,11 +41,40 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final model = context.watch<AssignmentModel>();
 
-    final total = mockAssignments.length;
-    final done = mockAssignments
-        .where((a) => a.status == AssignmentStatus.done)
-        .length;
+    final Widget stats;
+    if (model.isLoading) {
+      stats = const Center(child: CircularProgressIndicator());
+    } else if (model.error != null) {
+      stats = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(model.error!, style: textTheme.bodyMedium),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () => context.read<AssignmentModel>().load(),
+            child: const Text('Повторить'),
+          ),
+        ],
+      );
+    } else {
+      final done = model.doneCount;
+      final total = model.totalCount;
+      stats = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Выполнено $done из $total заданий',
+              style: textTheme.titleMedium),
+          const SizedBox(height: 12),
+          LinearProgressIndicator(
+            value: total == 0 ? 0 : done / total,
+            minHeight: 8,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ],
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Профиль')),
@@ -61,19 +105,7 @@ class ProfileScreen extends StatelessWidget {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Выполнено $done из $total заданий',
-                      style: textTheme.titleMedium),
-                  const SizedBox(height: 12),
-                  LinearProgressIndicator(
-                    value: done / total,
-                    minHeight: 8,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ],
-              ),
+              child: stats,
             ),
           ),
           const SizedBox(height: 8),
@@ -101,9 +133,22 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 8),
+          // Леса демонстрации: единственное место UI, знающее о mock-е.
+          Card(
+            child: SwitchListTile(
+              title: const Text('Симулировать сбой сети'),
+              subtitle: const Text('Для демонстрации экрана ошибки'),
+              value: _simulateError,
+              onChanged: (value) {
+                setState(() => _simulateError = value);
+                context.read<MockNetwork>().simulateError = value;
+              },
+            ),
+          ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: () => _logout(context),
+            onPressed: _logout,
             icon: const Icon(Icons.logout),
             label: const Text('Выйти'),
           ),
