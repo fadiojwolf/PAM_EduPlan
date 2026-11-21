@@ -29,6 +29,25 @@ class Course {
     required this.startTime,
   });
 
+  /// Граница JSON: сервер → доменная модель.
+  factory Course.fromJson(Map<String, dynamic> j) => Course(
+        id: j['id'] as int,
+        name: j['name'] as String,
+        teacher: j['teacher'] as String? ?? '',
+        room: j['room'] as String? ?? '',
+        weekday: j['weekday'] as int,
+        startTime: j['startTime'] as String,
+      );
+
+  /// Без id — идентичность даёт сервер.
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'teacher': teacher,
+        'room': room,
+        'weekday': weekday,
+        'startTime': startTime,
+      };
+
   /// «Тот же курс, другая идентичность» (id выдаёт хранилище).
   Course copyWith({int? id}) => Course(
         id: id ?? this.id,
